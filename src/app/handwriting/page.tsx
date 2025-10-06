@@ -29,7 +29,6 @@ export default function HandwritingPage() {
       });
 
       const data = await res.json();
-      console.log("📩 API response:", data);
       setAnalysis(data);
     } catch (err) {
       console.error("🚨 Upload failed:", err);
@@ -42,8 +41,12 @@ export default function HandwritingPage() {
   return (
     <main className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-6">
       <div className="relative bg-white/10 backdrop-blur-xl shadow-2xl rounded-2xl p-10 w-full max-w-2xl text-center border border-white/20">
-        <h1 className="text-3xl font-extrabold text-white mb-6">✍️ Handwriting Analysis</h1>
-        <p className="text-gray-300 mb-6">Upload a handwriting sample (JPG/PNG, ≤10MB) for AI analysis.</p>
+        <h1 className="text-3xl font-extrabold bg-gradient-to-r from-purple-500 to-blue-500 text-transparent bg-clip-text mb-6">
+          ✍️ Handwriting Analysis
+        </h1>
+        <p className="text-gray-300 mb-6">
+          Upload a handwriting sample (JPG/PNG, ≤10MB) for AI analysis.
+        </p>
 
         <input
           type="file"
@@ -72,23 +75,21 @@ export default function HandwritingPage() {
         </button>
 
         {analysis && (
-  <div className="mt-8 text-left bg-black/30 backdrop-blur-lg p-6 rounded-xl border border-white/10 shadow-inner text-gray-200 space-y-3">
-    <h2 className="text-xl font-bold text-green-400 mb-3">📊 Analysis Results</h2>
-    {analysis.error ? (
-      <p>{analysis.error}</p>
-    ) : (
-      <>
-        <p>📝 <b>Transcription:</b> {analysis.transcription || "N/A"}</p>
-        <p>🏷 <b>Issue Category:</b> {analysis.issue_category}</p>
-        <p>⚠️ <b>Risk Level:</b> {analysis.risk_level}</p>
-        <p>🛠 <b>Improvement Areas:</b> {analysis.improvement_areas?.join(", ") || "None"}</p>
-        <p>📌 <b>Summary:</b> {analysis.summary}</p>
-      </>
-    )}
-  </div>
-)}
-
-         
+          <div className="mt-8 text-left bg-black/30 backdrop-blur-lg p-6 rounded-xl border border-white/10 shadow-inner text-gray-200 space-y-3">
+            <h2 className="text-xl font-bold text-green-400 mb-3">📊 Analysis Results</h2>
+            {analysis.error ? (
+              <p>{analysis.error}</p>
+            ) : (
+              <>
+                <p>📝 <b>Transcription:</b> {analysis.transcription || "N/A"}</p>
+                <p>🏷 <b>Issue Category:</b> {analysis.issue_category || "N/A"}</p>
+                <p>⚠️ <b>Risk Level:</b> {analysis.risk_level || "N/A"}</p>
+                <p>🛠 <b>Improvement Areas:</b> {analysis.improvement_areas?.join(", ") || "None"}</p>
+                <p>📌 <b>Summary:</b> {analysis.summary || "N/A"}</p>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );
