@@ -1,10 +1,10 @@
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
 }
 
 model User {
@@ -13,10 +13,4 @@ model User {
   password String
   createdAt DateTime @default(now())
 }
-model EyeTest {
-  id        Int      @id @default(autoincrement())
-  userEmail String
-  score     Int
-  accuracy  Int
-  createdAt DateTime @default(now())
-}
+npx prisma migrate dev --name init

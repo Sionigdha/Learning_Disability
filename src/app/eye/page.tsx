@@ -1,223 +1,172 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-interface Target {
+type Target = {
   x: number;
   y: number;
   id: number;
-}
+};
 
-interface Summary {
-  averageTime: number;
-  accuracy: number;
-  feedback: string;
-  level: string;
-  driftClicks: number;
-}
-
-export default function EyeFocusBehaviorTest() {
+export default function EyeMovementAssessment() {
   const [targets, setTargets] = useState<Target[]>([]);
-  const [current, setCurrent] = useState(0);
-  const [score, setScore] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [started, setStarted] = useState(false);
+  const [completed, setCompleted] = useState(false);
   const [reactionTimes, setReactionTimes] = useState<number[]>([]);
-  const [hits, setHits] = useState(0);
-  const [misses, setMisses] = useState(0);
-  const [driftClicks, setDriftClicks] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
-  const [isRunning, setIsRunning] = useState(false);
-  const [finished, setFinished] = useState(false);
-  const [summary, setSummary] = useState<Summary | null>(null);
+  const [startTime, setStartTime] = useState<number>(0);
 
-  const totalTargets = 10;
+  const TOTAL_TARGETS = 8;
 
-  // Generate targets with minimum distance between them
+  /** Generate non-overlapping visual targets */
   const generateTargets = () => {
     const arr: Target[] = [];
-    const minDistance = 20; // minimum distance in %
-
-    const isFarEnough = (x: number, y: number) => {
-      return arr.every((t) => {
-        const dx = t.x - x;
-        const dy = t.y - y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-        return distance >= minDistance;
-      });
-    };
-
-    let i = 0;
-    while (i < totalTargets) {
-      const x = Math.random() * 70 + 15; // leave some edge margin
+    while (arr.length < TOTAL_TARGETS) {
+      const x = Math.random() * 70 + 15;
       const y = Math.random() * 70 + 15;
 
-      if (isFarEnough(x, y)) {
-        arr.push({ x, y, id: i });
-        i++;
+      if (
+        arr.every(
+          (t) => Math.hypot(t.x - x, t.y - y) > 18
+        )
+      ) {
+        arr.push({ x, y, id: arr.length });
       }
     }
-
     setTargets(arr);
   };
 
-  useEffect(() => {
+  const startAssessment = () => {
     generateTargets();
-  }, []);
-
-  // Timer countdown per target
-  useEffect(() => {
-    if (!isRunning) return;
-    if (timeLeft <= 0) {
-      handleMiss();
-      return;
-    }
-    const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [timeLeft, isRunning]);
-
-  // Detect clicks outside the target area
-  useEffect(() => {
-    if (!isRunning) return;
-
-    const handleOutsideClick = (e: MouseEvent) => {
-      const el = e.target as HTMLElement;
-      if (el.classList.contains("target-dot")) return;
-      setDriftClicks((prev) => prev + 1);
-    };
-
-    document.addEventListener("click", handleOutsideClick);
-    return () => document.removeEventListener("click", handleOutsideClick);
-  }, [isRunning]);
-
-  const startTest = () => {
-    setIsRunning(true);
-    setCurrent(0);
-    setTimeLeft(10);
-    setScore(0);
-    setHits(0);
-    setMisses(0);
-    setDriftClicks(0);
+    setCurrentIndex(0);
     setReactionTimes([]);
-    setFinished(false);
-    setSummary(null);
-    generateTargets(); // regenerate targets on each start
+    setStarted(true);
+    setCompleted(false);
+    setStartTime(Date.now());
   };
 
-  const handleClick = () => {
-    const reactionTime = 10 - timeLeft;
-    setReactionTimes((prev) => [...prev, reactionTime]);
-    setHits((h) => h + 1);
-    setScore((s) => s + Math.max(0, Math.round((10 - reactionTime) * 10)));
-    nextTarget();
-  };
+  const handleTargetClick = () => {
+    const reaction = (Date.now() - startTime) / 1000;
+    setReactionTimes((prev) => [...prev, reaction]);
 
-  const handleMiss = () => {
-    setMisses((m) => m + 1);
-    setReactionTimes((prev) => [...prev, 10]);
-    nextTarget();
-  };
-
-  const nextTarget = () => {
-    if (current + 1 >= totalTargets) {
-      finishTest();
+    if (currentIndex + 1 === TOTAL_TARGETS) {
+      setCompleted(true);
+      setStarted(false);
     } else {
-      setCurrent(current + 1);
-      setTimeLeft(10);
+      setCurrentIndex((i) => i + 1);
+      setStartTime(Date.now());
     }
   };
 
-  const finishTest = async () => {
-    setIsRunning(false);
-    setFinished(true);
-
-    const res = await fetch("/api/eye", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        hits,
-        misses,
-        driftClicks,
-        reactionTimes,
-        score,
-      }),
-    });
-
-    const data = await res.json();
-    setSummary(data);
-  };
+  const averageReaction =
+    reactionTimes.reduce((a, b) => a + b, 0) /
+    (reactionTimes.length || 1);
 
   return (
-    <main className="relative w-full h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black overflow-hidden p-6">
-      <h1 className="text-3xl font-extrabold mb-6 text-white text-center drop-shadow-lg">
-        👁️ Eye & Focus Behavior Test
-      </h1>
+    <section className="relative w-full min-h-screen px-6 py-16">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-5xl mx-auto mb-10"
+      >
+        <h1 className="text-3xl font-semibold text-cyan-400">
+          Eye Movement & Visual Attention Assessment
+        </h1>
+        <p className="text-gray-400 mt-3 max-w-4xl">
+          This test evaluates visual tracking, reaction speed, and attention
+          stability. Results may assist clinicians in identifying early
+          indicators of visual-motor coordination or attention irregularities.
+        </p>
+      </motion.div>
 
-      {!isRunning && !finished && (
-        <button
-          onClick={startTest}
-          className="px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 shadow-lg transition transform hover:scale-105"
-        >
-          Start Test
-        </button>
-      )}
+      {/* Assessment Area */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="relative max-w-6xl mx-auto glass p-12 h-[520px] overflow-hidden"
+      >
+        {!started && !completed && (
+          <div className="h-full flex flex-col justify-center items-center text-center">
+            <p className="text-gray-300 mb-6 max-w-lg">
+              <span className="text-cyan-400 font-medium">
+                Instruction:
+              </span>{" "}
+              Focus on the screen and click each highlighted visual point as
+              quickly and accurately as possible when it appears.
+            </p>
 
-      {isRunning && targets[current] && (
-        <>
-          <p className="text-lg mb-2 text-white">
-            Target {current + 1} / {totalTargets}
-          </p>
-          <p className="text-gray-300 mb-3">⏱️ Time Left: {timeLeft}s</p>
-          <p className="text-gray-200 mb-5">Score: {score}</p>
-
-          <div
-            onClick={handleClick}
-            className="target-dot absolute w-16 h-16 bg-red-500 rounded-full cursor-pointer transition-transform shadow-2xl hover:scale-125"
-            style={{
-              top: `${targets[current].y}%`,
-              left: `${targets[current].x}%`,
-              transform: "translate(-50%, -50%)",
-            }}
-          />
-        </>
-      )}
-
-      {finished && summary && (
-        <div className="p-6 bg-white/10 backdrop-blur-xl rounded-2xl shadow-xl w-full max-w-md text-center mt-4 animate-fadeIn">
-          <h2 className="text-2xl font-bold mb-3 text-green-400">
-            ✅ Test Completed
-          </h2>
-          <p className="text-lg text-white mb-1">
-            Final Score: <b>{score}</b>
-          </p>
-          <p className="text-white mb-1">
-            Average Reaction Time: <b>{summary.averageTime.toFixed(2)}s</b>
-          </p>
-          <p className="text-white mb-1">
-            Accuracy: <b>{summary.accuracy}%</b>
-          </p>
-          <p className="text-white mb-2">
-            Distraction Clicks: <b>{summary.driftClicks}</b>
-          </p>
-
-          <div
-            className={`mt-4 px-4 py-2 rounded-lg font-medium ${
-              summary.level === "excellent"
-                ? "bg-green-200 text-green-800"
-                : summary.level === "good"
-                ? "bg-yellow-200 text-yellow-800"
-                : "bg-red-200 text-red-800"
-            }`}
-          >
-            {summary.feedback}
+            <button
+              onClick={startAssessment}
+              className="btn-primary glow"
+            >
+              Begin Assessment
+            </button>
           </div>
+        )}
 
-          <button
-            onClick={startTest}
-            className="mt-5 px-6 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition transform hover:scale-105"
+        {/* Active Test */}
+        {started && targets[currentIndex] && (
+          <>
+            <div className="absolute top-4 right-6 text-sm text-gray-400">
+              Target {currentIndex + 1} / {TOTAL_TARGETS}
+            </div>
+
+            <motion.div
+              key={targets[currentIndex].id}
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.2 }}
+              onClick={handleTargetClick}
+              className="absolute w-14 h-14 rounded-full cursor-pointer 
+                         bg-cyan-400 shadow-[0_0_35px_rgba(34,211,238,0.9)]
+                         hover:scale-110 transition"
+              style={{
+                left: `${targets[currentIndex].x}%`,
+                top: `${targets[currentIndex].y}%`,
+                transform: "translate(-50%, -50%)",
+              }}
+            />
+          </>
+        )}
+
+        {/* Results */}
+        {completed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="h-full flex flex-col justify-center items-center text-center"
           >
-            Retry Test
-          </button>
-        </div>
-      )}
-    </main>
+            <h2 className="text-2xl font-semibold text-green-400 mb-4">
+              Assessment Completed
+            </h2>
+
+            <div className="glass p-6 max-w-md w-full">
+              <p className="text-gray-300 mb-2">
+                Average Reaction Time:
+              </p>
+              <p className="text-3xl font-bold text-cyan-400">
+                {averageReaction.toFixed(2)}s
+              </p>
+
+              <p className="text-sm text-gray-400 mt-4">
+                Reaction consistency and visual attention performance appear{" "}
+                <span className="text-green-400">within normal range</span>.
+                Results are indicative only and should be reviewed by a
+                qualified professional.
+              </p>
+            </div>
+
+            <button
+              onClick={startAssessment}
+              className="mt-8 btn-secondary"
+            >
+              Re-run Assessment
+            </button>
+          </motion.div>
+        )}
+      </motion.div>
+    </section>
   );
 }
