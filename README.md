@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Learning Disability Screening System
 
-## Getting Started
+A web-based application designed to **screen and assess indicators of learning disabilities** using multiple interactive tests.  
+This system is intended for **educational and assistive purposes only**, not for medical diagnosis.
 
-First, run the development server:
+The project integrates several cognitive and perceptual tests into a single dashboard to help identify potential learning challenges.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Multi-module screening system
+- Interactive and user-friendly dashboard
+- Timed and accuracy-based test evaluation
+- Modular design for easy extension
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Screening Modules
 
-To learn more about Next.js, take a look at the following resources:
+- **Speech Analysis**
+  - User speech input
+  - Backend-based analysis of speech patterns
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Handwriting Analysis**
+  - Image-based handwriting input
+  - Pattern-oriented evaluation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- **Eye Movement Test**
+  - Visual tracking and response-based interaction
 
-## Deploy on Vercel
+- **Color Blindness Detection**
+  - Ishihara-style plate test
+  - Timed responses with accuracy checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Tech Stack
+
+**Frontend**
+- Next.js
+- React
+- TypeScript
+- Tailwind CSS
+
+**Backend**
+- Node.js
+- API-based processing
+
+---
+
+## Project Structure
+
+/app # Frontend pages and UI components
+/api # Backend API routes
+/modules # Individual test modules
+/public # Static assets (plates, images, etc.)
+
+
+---
+
+## How It Works
+
+1. Users access the dashboard and select a screening module.
+2. Each module presents an interactive test.
+3. User responses are processed via backend APIs.
+4. Results are generated based on predefined evaluation logic.
+5. The system provides indicative feedback for screening purposes.
+
+---
+
+## Status
+
+🚧 **Work in Progress**
+
+Planned improvements:
+- Result aggregation and reporting
+- Improved evaluation logic
+- Better UI accessibility
+- Data visualization for results
+
+---
+
+## Ethical Note
+
+This project is **not a diagnostic tool** and does not replace professional evaluation.  
+It is intended solely as a **screening and educational support system**.
+
+---
+
+## Purpose
+
+This project was developed to explore:
+- Human–computer interaction
+- Assistive technology design
+- Frontend–backend integration
+- Ethical handling of sensitive user data
